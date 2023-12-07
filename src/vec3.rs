@@ -1,6 +1,6 @@
 use std::ops;
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Default)]
 pub struct Vec3 {
     e: [f32; 3],
 }
@@ -81,6 +81,7 @@ impl ops::Sub<f32> for Vec3 {
         }
     }
 }
+
 impl ops::Mul<f32> for Vec3 {
     type Output = Self;
     fn mul(self, rhs: f32) -> Self::Output {
@@ -119,6 +120,16 @@ impl ops::Mul<Vec3> for f32 {
     fn mul(self, rhs: Vec3) -> Self::Output {
         Vec3 {
             e: [rhs.e[0] * self, rhs.e[1] * self, rhs.e[2] * self],
+        }
+    }
+}
+
+impl ops::Neg for Vec3 {
+    type Output = Vec3;
+
+    fn neg(self) -> Vec3 {
+        Vec3 {
+            e: [-self.e[0], -self.e[1], -self.e[2]],
         }
     }
 }
