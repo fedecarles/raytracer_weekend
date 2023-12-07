@@ -1,4 +1,7 @@
+use hittable::*;
+use hittable_list::*;
 use ray::Ray;
+use sphere::*;
 use vec3::Vec3;
 
 pub mod hittable;
@@ -7,31 +10,15 @@ pub mod ray;
 pub mod sphere;
 pub mod vec3;
 
-fn hit_sphere(center: Vec3, radius: f32, r: &Ray) -> f32 {
-    let oc: Vec3 = r.origin() - center;
-    let a: f32 = r.direction().length().sqrt();
-    let half_b: f32 = Vec3::dot(&oc, &r.direction());
-    let c: f32 = oc.length().sqrt() - radius * radius;
-    let discriminant: f32 = half_b * half_b - a * c;
-
-    if discriminant < 0.0 {
-        return -1.0;
-    } else {
-        return (-half_b - discriminant.sqrt()) / a;
+fn color(r: Ray, world: &HittableList) -> Vec3 {
+    let mut rec = HitRecord::default();
+    if world.hit(r, 0.0, std::f32::INFINITY, &mut rec) {
+        return 0.5 * (rec.normal + Vec3::new(1.0, 1.0, 1.0));
     }
-}
-
-fn color(r: &Ray) -> Vec3 {
-    let t: f32 = hit_sphere(Vec3::new(0.0, 0.0, -1.0), 0.5, r);
-    if t > 0.0 {
-        let n: Vec3 = Vec3::unit_vector(r.at(t) - Vec3::new(0.0, 0.0, -1.0));
-        return 0.5 * Vec3::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0);
-    }
-
     let unit_direction: Vec3 = Vec3::unit_vector(r.direction());
-    let t: f32 = 0.5 * (unit_direction.y() + 1.0);
+    let a: f32 = 0.5 * (unit_direction.y() + 1.0);
 
-    Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t
+    (1.0 - a) * Vec3::new(1.0, 1.0, 1.0) + a * Vec3::new(0.5, 0.7, 1.0)
 }
 
 fn write_color(pixel_color: Vec3) {
@@ -48,6 +35,11 @@ fn main() {
     let aspect_ratio: f32 = 16.0 / 9.0;
     let width: i32 = 400;
     let height: i32 = std::cmp::max((width as f32 / aspect_ratio) as i32, 1);
+
+    // World
+    let mut world = HittableList::default();
+    world.add(Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)));
+    world.add(Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)));
 
     // Camera
     let focal_length: f32 = 1.0;
@@ -72,25 +64,16 @@ fn main() {
 
     let max_value: i32 = 255;
 
-    let lower_left_corner = Vec3::new(-2.0, -1.0, -1.0);
-    let horizontal = Vec3::new(4.0, 0.0, 0.0);
-    let vertical = Vec3::new(0.0, 2.0, 0.0);
-    let origin = Vec3::new(0.0, 0.0, 0.0);
-
     // Render
     println!("P3\n{} {}\n{}", width, height, max_value);
     for j in (0..height).rev() {
         for i in 0..width {
-            let u = i as f32 / width as f32;
-            let v = j as f32 / height as f32;
-            //let r: Ray = Ray::ray(origin, lower_left_corner + horizontal * u + vertical * v);
-
             let pixel_center: Vec3 =
                 pixel_00_loc + (i as f32 * pixel_delta_u) + (j as f32 * pixel_delta_v);
             let ray_direction: Vec3 = pixel_center - camera_center;
 
             let r: Ray = Ray::ray(camera_center, ray_direction);
-            let color = color(&r);
+            let color = color(r, &world);
 
             write_color(color);
         }

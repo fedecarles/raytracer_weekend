@@ -1,19 +1,19 @@
 use crate::hittable::*;
 use crate::ray::Ray;
-use crate::vec3::Vec3;
 
+#[derive(Default)]
 pub struct HittableList {
     objects: Vec<Box<dyn Hittable>>,
 }
 
 impl HittableList {
-    pub fn new(self, objects: Vec<Box<dyn Hittable>>) -> Self {
-        Self { objects }
+    pub fn new(objects: Vec<Box<dyn Hittable>>) -> HittableList {
+        HittableList { objects }
     }
 
-    //pub fn add(&mut self, object: Vec<Box<dyn Hittable>>) {
-    //    self.objects.push(object);
-    //}
+    pub fn add(&mut self, object: Box<dyn Hittable>) {
+        self.objects.push(object);
+    }
 }
 
 impl Hittable for HittableList {
@@ -28,7 +28,7 @@ impl Hittable for HittableList {
                 closest_so_far = temp_rec.t;
                 rec.set_t(closest_so_far);
                 rec.set_p(temp_rec.p());
-                rec.set_normal(temp_rec.normal);
+                rec.set_face_normal(&r, temp_rec.normal);
             }
         }
         return hit_anything;

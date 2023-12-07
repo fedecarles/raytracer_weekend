@@ -38,14 +38,14 @@ pub trait Hittable {
 }
 
 impl HitRecord {
-    pub fn set_face_normal(&self, r: &Ray, outward_normal: Vec3) {
+    pub fn set_face_normal(&mut self, r: &Ray, outward_normal: Vec3) {
         // Sets the hit record normal vector.
         // NOTE: the parameter `outward_normal` is assumed to have unit length.
         let front_face: bool = Vec3::dot(&r.direction(), &outward_normal) < 0.0;
-        let normal = if front_face {
-            outward_normal
+        if front_face {
+            self.normal = outward_normal
         } else {
-            -outward_normal
+            self.normal = -outward_normal
         };
     }
 }
