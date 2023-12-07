@@ -2,6 +2,7 @@ use hittable::*;
 use hittable_list::*;
 use ray::Ray;
 use sphere::*;
+use std::ops::Range;
 use vec3::Vec3;
 
 pub mod hittable;
@@ -12,7 +13,14 @@ pub mod vec3;
 
 fn color(r: Ray, world: &HittableList) -> Vec3 {
     let mut rec = HitRecord::default();
-    if world.hit(r, 0.0, std::f32::INFINITY, &mut rec) {
+    if world.hit(
+        r,
+        Range {
+            start: 0.0,
+            end: std::f32::INFINITY,
+        },
+        &mut rec,
+    ) {
         return 0.5 * (rec.normal + Vec3::new(1.0, 1.0, 1.0));
     }
     let unit_direction: Vec3 = Vec3::unit_vector(r.direction());

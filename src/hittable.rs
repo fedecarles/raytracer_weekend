@@ -1,5 +1,6 @@
 use crate::ray::Ray;
 use crate::vec3::Vec3;
+use std::ops::Range;
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct HitRecord {
@@ -10,29 +11,13 @@ pub struct HitRecord {
 }
 
 impl HitRecord {
-    pub fn p(&self) -> Vec3 {
-        self.p
-    }
-    pub fn t(&self) -> f32 {
-        self.t
-    }
-
-    pub fn set_p(&mut self, val: Vec3) {
-        self.p = val
-    }
-    pub fn set_normal(&mut self, val: Vec3) {
-        self.normal = val
-    }
-    pub fn set_t(&mut self, val: f32) {
-        self.t = val
-    }
     pub fn set_front_face(&mut self, val: bool) {
         self.front_face = val
     }
 }
 
 pub trait Hittable {
-    fn hit(&self, r: Ray, ray_tmin: f32, ray_tmax: f32, rec: &mut HitRecord) -> bool {
+    fn hit(&self, r: Ray, ray_t: Range<f32>, rec: &mut HitRecord) -> bool {
         return false;
     }
 }

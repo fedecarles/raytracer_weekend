@@ -1,3 +1,5 @@
+use std::ops::Range;
+
 use crate::hittable::*;
 use crate::ray::Ray;
 
@@ -17,17 +19,24 @@ impl HittableList {
 }
 
 impl Hittable for HittableList {
-    fn hit(&self, r: Ray, ray_tmin: f32, ray_tmax: f32, rec: &mut HitRecord) -> bool {
+    fn hit(&self, r: Ray, ray_t: Range<f32>, rec: &mut HitRecord) -> bool {
         let mut temp_rec = HitRecord::default();
         let mut hit_anything: bool = false;
-        let mut closest_so_far: f32 = ray_tmax;
+        let mut closest_so_far: f32 = ray_t.end;
 
         for object in &self.objects {
-            if object.hit(r, ray_tmin, closest_so_far, &mut temp_rec) {
+            if object.hit(
+                r,
+                Range {
+                    start: ray_t.start,
+                    end: closest_so_far,
+                },
+                &mut temp_rec,
+            ) {
                 hit_anything = true;
                 closest_so_far = temp_rec.t;
-                rec.set_t(closest_so_far);
-                rec.set_p(temp_rec.p());
+                rec.t = closest_so_far;
+                rec.p = temp_rec.p;
                 rec.set_face_normal(&r, temp_rec.normal);
             }
         }

@@ -1,3 +1,5 @@
+use std::ops::Range;
+
 use crate::hittable::*;
 use crate::vec3::Vec3;
 use crate::Ray;
@@ -17,7 +19,7 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, r: Ray, ray_tmin: f32, ray_tmax: f32, rec: &mut HitRecord) -> bool {
+    fn hit(&self, r: Ray, ray_t: Range<f32>, rec: &mut HitRecord) -> bool {
         let oc: Vec3 = r.origin() - self.center;
         let a: f32 = r.direction().length_squared();
         let half_b: f32 = Vec3::dot(&oc, &r.direction());
@@ -31,15 +33,15 @@ impl Hittable for Sphere {
 
         // Find the nearest root that lies in the acceptable range.
         let root: f32 = (-half_b - sqrtd) / a;
-        if root <= ray_tmin || ray_tmax <= root {
+        if !(ray_t.contains(&root)) {
             let root: f32 = (-half_b + sqrtd) / a;
-            if root <= ray_tmin || ray_tmax <= root {
+            if !(ray_t.contains(&root)) {
                 return false;
             }
         };
 
-        rec.set_t(root);
-        rec.set_p(r.at(rec.t));
+        rec.t = root;
+        rec.p = r.at(rec.t);
         let outward_normal = (rec.p - self.center) / self.radius;
         rec.set_face_normal(&r, outward_normal);
         return true;
