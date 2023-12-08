@@ -1,7 +1,18 @@
 use crate::hittable_list::HittableList;
 use crate::ray::Ray;
 use crate::{hittable::*, vec3::Vec3};
+use rand::prelude::*;
 use std::ops::Range;
+
+fn clamp(rng: &Range<f32>, val: f32) -> f32 {
+    if val < rng.start {
+        rng.start
+    } else if val > rng.end {
+        rng.end
+    } else {
+        return val;
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Camera {
@@ -12,6 +23,7 @@ pub struct Camera {
     pixel00_loc: Vec3,
     pixel_delta_u: Vec3,
     pixel_delta_v: Vec3,
+    pub samples_per_pixel: i32,
 }
 
 impl Camera {
@@ -22,24 +34,38 @@ impl Camera {
         println!("P3\n{} {}\n{}", self.image_width, self.image_height, 255);
         for j in (0..self.image_height).rev() {
             for i in 0..self.image_width {
-                let pixel_center: Vec3 = self.pixel00_loc
-                    + (i as f32 * self.pixel_delta_u)
-                    + (j as f32 * self.pixel_delta_v);
-                let ray_direction: Vec3 = pixel_center - self.center;
+                let mut pixel_color = Vec3::new(0.0, 0.0, 0.0);
+                for _ in 0..self.samples_per_pixel {
+                    let r: Ray = self.get_ray(i, j);
+                    pixel_color = pixel_color + self.color(r, &world);
+                }
 
-                let r: Ray = Ray::ray(self.center, ray_direction);
-                let color = self.color(r, &world);
-
-                self.write_color(color);
+                self.write_color(pixel_color, self.samples_per_pixel);
             }
         }
     }
-    pub fn write_color(self, pixel_color: Vec3) {
+    pub fn write_color(self, pixel_color: Vec3, samples_per_pixel: i32) {
+        let mut r = pixel_color.x();
+        let mut g = pixel_color.y();
+        let mut b = pixel_color.z();
+
+        // Divide the color by the number of samples.
+
+        let scale = 1.0 / samples_per_pixel as f32;
+        r *= scale;
+        g *= scale;
+        b *= scale;
+
+        // Write the translated [0, 255] value of each color component.
+        let intensity: Range<f32> = Range {
+            start: 0.000,
+            end: 0.999,
+        };
         println!(
             "{} {} {}",
-            (255.99 * pixel_color.x()) as i32,
-            (255.99 * pixel_color.y()) as i32,
-            (255.99 * pixel_color.z()) as i32
+            (255.99 * clamp(&intensity, r)) as i32,
+            (255.99 * clamp(&intensity, g)) as i32,
+            (255.99 * clamp(&intensity, b)) as i32
         )
     }
     pub fn initialize(&mut self) {
@@ -48,6 +74,7 @@ impl Camera {
         self.image_width = 400;
         self.image_height = std::cmp::max((self.image_width as f32 / self.aspect_ratio) as i32, 1);
         self.center = Vec3::new(0.0, 0.0, 0.0);
+        self.samples_per_pixel = 100;
 
         // viewport size
         let focal_length: f32 = 1.0;
@@ -85,5 +112,23 @@ impl Camera {
         let a: f32 = 0.5 * (unit_direction.y() + 1.0);
 
         (1.0 - a) * Vec3::new(1.0, 1.0, 1.0) + a * Vec3::new(0.5, 0.7, 1.0)
+    }
+    pub fn get_ray(self, i: i32, j: i32) -> Ray {
+        // Get a randomly samples camera ray for the pixel at location i, j.
+        let pixel_center: Vec3 =
+            self.pixel00_loc + (i as f32 * self.pixel_delta_u) + (j as f32 * self.pixel_delta_v);
+        let pixel_sample: Vec3 = pixel_center + self.pixel_sample_square();
+        let ray_origin = self.center;
+        let ray_direction: Vec3 = pixel_sample - ray_origin;
+
+        Ray::ray(ray_origin, ray_direction)
+    }
+
+    fn pixel_sample_square(&self) -> Vec3 {
+        let mut rng = rand::thread_rng();
+        // Returns a random point in the square surrounding a pixel at the origin.
+        let px = -0.5 + rng.gen::<f32>();
+        let py = -0.5 + rng.gen::<f32>();
+        (px * self.pixel_delta_u) + (py * self.pixel_delta_v)
     }
 }
