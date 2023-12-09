@@ -24,5 +24,8 @@ fn main() {
 
     // Camera
     let mut cam: Camera = Camera::default();
+    cam.initialize();
+    cam.samples_per_pixel = 100;
+    cam.max_deph = 50;
     cam.render(&world)
 }
