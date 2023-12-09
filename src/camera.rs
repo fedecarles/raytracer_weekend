@@ -106,7 +106,9 @@ impl Camera {
             },
             &mut rec,
         ) {
-            return 0.5 * (rec.normal + Vec3::new(1.0, 1.0, 1.0));
+            let direction: Vec3 = Vec3::random_on_hemisphere(&rec.normal);
+            return 0.5 * self.color(Ray::ray(rec.p, direction), world);
+            //return 0.5 * (rec.normal + Vec3::new(1.0, 1.0, 1.0));
         }
         let unit_direction: Vec3 = Vec3::unit_vector(r.direction());
         let a: f32 = 0.5 * (unit_direction.y() + 1.0);
