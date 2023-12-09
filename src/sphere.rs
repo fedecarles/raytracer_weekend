@@ -1,19 +1,22 @@
 use std::ops::Range;
 
 use crate::hittable::*;
+use crate::material::Material;
 use crate::vec3::Vec3;
 use crate::Ray;
 
 pub struct Sphere {
     pub center: Vec3,
     pub radius: f32,
+    pub mat: Material,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: f32) -> Sphere {
+    pub fn new(center: Vec3, radius: f32, mat: Material) -> Sphere {
         Sphere {
             center: center,
             radius: radius,
+            mat: mat,
         }
     }
 }
@@ -44,6 +47,7 @@ impl Hittable for Sphere {
         rec.p = r.at(rec.t);
         let outward_normal = (rec.p - self.center) / self.radius;
         rec.set_face_normal(&r, outward_normal);
+        rec.mat = self.mat;
         return true;
     }
 }

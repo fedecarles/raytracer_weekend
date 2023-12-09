@@ -14,6 +14,10 @@ fn clamp(rng: &Range<f32>, val: f32) -> f32 {
     }
 }
 
+fn linear_to_gama(linear_component: f32) -> f32 {
+    return linear_component.sqrt();
+}
+
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Camera {
     pub aspect_ratio: f32,
@@ -56,6 +60,11 @@ impl Camera {
         r *= scale;
         g *= scale;
         b *= scale;
+
+        // Apply the linear to gamma transform.
+        r = linear_to_gama(r);
+        g = linear_to_gama(g);
+        b = linear_to_gama(b);
 
         // Write the translated [0, 255] value of each color component.
         let intensity: Range<f32> = Range {

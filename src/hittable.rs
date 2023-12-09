@@ -1,3 +1,4 @@
+use crate::material::Material;
 use crate::ray::Ray;
 use crate::vec3::Vec3;
 use std::ops::Range;
@@ -6,6 +7,7 @@ use std::ops::Range;
 pub struct HitRecord {
     pub p: Vec3,
     pub normal: Vec3,
+    pub mat: Material,
     pub t: f32,
     pub front_face: bool,
 }
