@@ -111,7 +111,7 @@ impl Camera {
             },
             &mut rec,
         ) {
-            let direction: Vec3 = Vec3::random_on_hemisphere(&rec.normal);
+            let direction: Vec3 = rec.normal + Vec3::random_unit_vector();
 
             // this is recursive! It will stop only when the rays dont hit anything,
             // which could take too long.
