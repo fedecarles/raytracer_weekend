@@ -1,8 +1,35 @@
 use crate::{hittable::*, ray::Ray, vec3::Vec3};
 
-#[derive(Debug, Default, Clone, Copy)]
-pub struct Material {}
+#[derive(Debug, Clone, Copy)]
+pub enum Material {
+    Lambertian { albedo: Vec3 },
+}
 
-trait Scatter {
-    fn scatter(r_in: &Ray, rec: &HitRecord, attenuation: &Vec3, scattered: &Ray) -> bool;
+impl Default for Material {
+    fn default() -> Self {
+        Self::Lambertian {
+            albedo: Vec3::default(),
+        }
+    }
+}
+//pub trait Material {
+//    fn scatter(&self, r_in: &Ray, rec: &HitRecord, attenuation: &Vec3, scattered: &Ray) -> bool;
+//}
+
+impl Material {
+    fn scatter(&self, r_in: &Ray, rec: &HitRecord, attenuation: &Vec3, scattered: &Ray) -> bool {
+        match self {
+            Self::Lambertian { albedo } => {
+                let mut scatter_direction = rec.normal + Vec3::random_unit_vector();
+
+                //Catch degenerate scatter direction
+                if scatter_direction.near_zero() {
+                    scatter_direction = rec.normal;
+                }
+                let scattered = Ray::ray(rec.p, scatter_direction);
+                let attenuation = albedo;
+                return true;
+            }
+        }
+    }
 }

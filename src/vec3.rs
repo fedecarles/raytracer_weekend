@@ -1,5 +1,5 @@
-use rand::{random, Rng};
-use std::ops::{self, Range};
+use rand::Rng;
+use std::ops;
 
 #[derive(Debug, PartialEq, Clone, Copy, Default)]
 pub struct Vec3 {
@@ -41,6 +41,12 @@ impl Vec3 {
 
     pub fn length_squared(self) -> f32 {
         self.e[0] * self.e[0] + self.e[1] * self.e[1] + self.e[2] * self.e[2]
+    }
+
+    pub fn near_zero(self) -> bool {
+        // Return true if the vector is close to zero in all dimensions.
+        let s: f32 = 1e-8;
+        return (self.e[0].abs() < s) && (self.e[1].abs() < s) && (self.e[2].abs() < s);
     }
 
     pub fn unit_vector(v: Vec3) -> Vec3 {

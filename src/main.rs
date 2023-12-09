@@ -1,5 +1,6 @@
 use camera::Camera;
 use hittable_list::*;
+use material::Material;
 use ray::Ray;
 use sphere::*;
 use vec3::Vec3;
@@ -20,8 +21,16 @@ fn degrees_to_radian(degrees: f32) -> f32 {
 fn main() {
     // World
     let mut world = HittableList::default();
-    world.add(Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)));
-    world.add(Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)));
+    world.add(Box::new(Sphere::new(
+        Vec3::new(0.0, 0.0, -1.0),
+        0.5,
+        Material::default(),
+    )));
+    world.add(Box::new(Sphere::new(
+        Vec3::new(0.0, -100.5, -1.0),
+        100.0,
+        Material::default(),
+    )));
 
     // Camera
     let mut cam: Camera = Camera::default();
