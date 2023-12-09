@@ -74,7 +74,7 @@ impl Camera {
         self.image_width = 400;
         self.image_height = std::cmp::max((self.image_width as f32 / self.aspect_ratio) as i32, 1);
         self.center = Vec3::new(0.0, 0.0, 0.0);
-        self.samples_per_pixel = 100;
+        self.samples_per_pixel = 10;
 
         // viewport size
         let focal_length: f32 = 1.0;
@@ -84,7 +84,7 @@ impl Camera {
 
         // Calculate the vectors across the horizontal and down the vertical viewport edges.
         let viewport_u: Vec3 = Vec3::new(viewport_width, 0.0, 0.0);
-        let viewport_v: Vec3 = Vec3::new(0.0, -viewport_height, 0.0);
+        let viewport_v: Vec3 = Vec3::new(0.0, viewport_height, 0.0);
 
         // Calculate the horizontal and vertical delta vectors from pixel to pixel.
         self.pixel_delta_u = viewport_u / self.image_width as f32;
