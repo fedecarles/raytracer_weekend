@@ -74,7 +74,7 @@ impl Camera {
         self.image_width = 400;
         self.image_height = std::cmp::max((self.image_width as f32 / self.aspect_ratio) as i32, 1);
         self.center = Vec3::new(0.0, 0.0, 0.0);
-        self.samples_per_pixel = 10;
+        self.samples_per_pixel = 100;
 
         // viewport size
         let focal_length: f32 = 1.0;
@@ -107,6 +107,9 @@ impl Camera {
             &mut rec,
         ) {
             let direction: Vec3 = Vec3::random_on_hemisphere(&rec.normal);
+
+            // this is recursive! It will stop only when the rays dont hit anything,
+            // which could take too long.
             return 0.5 * self.color(Ray::ray(rec.p, direction), world);
             //return 0.5 * (rec.normal + Vec3::new(1.0, 1.0, 1.0));
         }
