@@ -120,11 +120,19 @@ impl Camera {
             },
             &mut rec,
         ) {
-            let direction: Vec3 = rec.normal + Vec3::random_unit_vector();
+            let scattered: Ray = Ray::default();
+            let attenuation: Vec3 = Vec3::default();
+            if rec.mat.scatter(&r, &rec, &attenuation, &scattered) {
+                return attenuation * self.color(scattered, depth - 1, world);
+            } else {
+                return Vec3::default();
+            }
+
+            //let direction: Vec3 = rec.normal + Vec3::random_unit_vector();
 
             // this is recursive! It will stop only when the rays dont hit anything,
             // which could take too long.
-            return 0.5 * self.color(Ray::ray(rec.p, direction), depth - 1, world);
+            //return 0.5 * self.color(Ray::ray(rec.p, direction), depth - 1, world);
             //return 0.5 * (rec.normal + Vec3::new(1.0, 1.0, 1.0));
         }
         let unit_direction: Vec3 = Vec3::unit_vector(r.direction());

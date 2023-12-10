@@ -1,6 +1,6 @@
 use crate::vec3::Vec3;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Default)]
 pub struct Ray {
     orig: Vec3,
     dir: Vec3,

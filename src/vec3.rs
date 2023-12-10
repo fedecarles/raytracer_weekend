@@ -76,6 +76,10 @@ impl Vec3 {
         }
     }
 
+    pub fn reflect(v: Vec3, n: Vec3) -> Vec3 {
+        return v - 2.0 * Vec3::dot(&v, &n) * n;
+    }
+
     pub fn dot(v1: &Vec3, v2: &Vec3) -> f32 {
         v1.e[0] * v2.e[0] + v1.e[1] * v2.e[1] + v1.e[2] * v2.e[2]
     }
