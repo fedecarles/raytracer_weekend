@@ -8,21 +8,21 @@ use crate::Ray;
 pub struct Sphere {
     pub center: Vec3,
     pub radius: f32,
-    pub mat: Material,
+    pub material: Material,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: f32, mat: Material) -> Sphere {
+    pub fn new(center: Vec3, radius: f32, material: Material) -> Sphere {
         Sphere {
             center: center,
             radius: radius,
-            mat: mat,
+            material: material,
         }
     }
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, r: Ray, ray_t: Range<f32>, rec: &mut HitRecord) -> bool {
+    fn hit(&self, r: &Ray, ray_t: Range<f32>, depth: i32) -> Option<HitRecord> {
         let oc: Vec3 = r.origin() - self.center;
         let a: f32 = r.direction().length_squared();
         let half_b: f32 = Vec3::dot(&oc, &r.direction());
@@ -30,7 +30,7 @@ impl Hittable for Sphere {
 
         let discriminant: f32 = half_b * half_b - a * c;
         if discriminant < 0.0 {
-            return false;
+            return None;
         }
         let sqrtd: f32 = discriminant.sqrt();
 
@@ -39,15 +39,15 @@ impl Hittable for Sphere {
         if !(ray_t.contains(&root)) {
             let root: f32 = (-half_b + sqrtd) / a;
             if !(ray_t.contains(&root)) {
-                return false;
+                return None;
             }
         };
 
-        rec.t = root;
-        rec.p = r.at(rec.t);
-        let outward_normal = (rec.p - self.center) / self.radius;
-        rec.set_face_normal(&r, outward_normal);
-        rec.mat = self.mat;
-        return true;
+        return Some(HitRecord {
+            p: r.at(root),
+            normal: (r.at(root) - self.center) / self.radius,
+            material: self.material,
+            t: root,
+        });
     }
 }

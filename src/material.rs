@@ -13,37 +13,26 @@ impl Default for Material {
         }
     }
 }
-//pub trait Material {
-//    fn scatter(&self, r_in: &Ray, rec: &HitRecord, attenuation: &Vec3, scattered: &Ray) -> bool;
-//}
 
-impl Material {
-    pub fn scatter(
-        &self,
-        r_in: &Ray,
-        rec: &HitRecord,
-        attenuation: &Vec3,
-        scattered: &Ray,
-    ) -> bool {
-        match self {
-            Self::Lambertian { albedo } => {
-                let mut scatter_direction = rec.normal + Vec3::random_unit_vector();
-
-                //Catch degenerate scatter direction
-                if scatter_direction.near_zero() {
-                    scatter_direction = rec.normal;
-                }
-                let scattered = Ray::ray(rec.p, scatter_direction);
-                let attenuation = albedo;
-                return true;
-            }
-            Self::Metal { albedo } => {
-                let reflected: Vec3 =
-                    Vec3::reflect(Vec3::unit_vector(r_in.direction()), rec.normal);
-                let scattered = Ray::ray(rec.p, reflected);
-                let attenuation = albedo;
-                return true;
-            }
+pub fn scatter(
+    material: &Material,
+    r_in: &Ray,
+    rec: &HitRecord,
+    attenuation: &mut Vec3,
+    scattered: &mut Ray,
+) -> bool {
+    match material {
+        &Material::Lambertian { albedo } => {
+            let target = rec.p + rec.normal + Vec3::random_in_unit_sphere();
+            *scattered = Ray::ray(rec.p, target - rec.p);
+            *attenuation = albedo;
+            return true;
+        }
+        &Material::Metal { albedo } => {
+            let reflected = Vec3::reflect(Vec3::unit_vector(r_in.direction()), rec.normal);
+            *scattered = Ray::ray(rec.p, reflected);
+            *attenuation = albedo;
+            return true;
         }
     }
 }

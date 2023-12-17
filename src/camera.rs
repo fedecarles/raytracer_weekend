@@ -1,3 +1,4 @@
+use crate::color;
 use crate::hittable_list::HittableList;
 use crate::ray::Ray;
 use crate::{hittable::*, vec3::Vec3};
@@ -39,10 +40,10 @@ impl Camera {
         println!("P3\n{} {}\n{}", self.image_width, self.image_height, 255);
         for j in (0..self.image_height).rev() {
             for i in 0..self.image_width {
-                let mut pixel_color = Vec3::new(0.0, 0.0, 0.0);
+                let mut pixel_color = Vec3::default();
                 for _ in 0..self.samples_per_pixel {
                     let r: Ray = self.get_ray(i, j);
-                    pixel_color = pixel_color + self.color(r, self.max_deph, &world);
+                    pixel_color = pixel_color + color(&r, self.max_deph, &world);
                 }
 
                 self.write_color(pixel_color, self.samples_per_pixel);
@@ -107,39 +108,6 @@ impl Camera {
         self.pixel00_loc = viewport_upper_left + 0.5 * (self.pixel_delta_u + self.pixel_delta_v);
     }
 
-    pub fn color(self, r: Ray, depth: i32, world: &HittableList) -> Vec3 {
-        let mut rec = HitRecord::default();
-        if depth <= 0 {
-            return Vec3::new(0.0, 0.0, 0.0);
-        }
-        if world.hit(
-            r,
-            Range {
-                start: 0.001,
-                end: std::f32::INFINITY,
-            },
-            &mut rec,
-        ) {
-            let scattered: Ray = Ray::default();
-            let attenuation: Vec3 = Vec3::default();
-            if rec.mat.scatter(&r, &rec, &attenuation, &scattered) {
-                return attenuation * self.color(scattered, depth - 1, world);
-            } else {
-                return Vec3::default();
-            }
-
-            //let direction: Vec3 = rec.normal + Vec3::random_unit_vector();
-
-            // this is recursive! It will stop only when the rays dont hit anything,
-            // which could take too long.
-            //return 0.5 * self.color(Ray::ray(rec.p, direction), depth - 1, world);
-            //return 0.5 * (rec.normal + Vec3::new(1.0, 1.0, 1.0));
-        }
-        let unit_direction: Vec3 = Vec3::unit_vector(r.direction());
-        let a: f32 = 0.5 * (unit_direction.y() + 1.0);
-
-        (1.0 - a) * Vec3::new(1.0, 1.0, 1.0) + a * Vec3::new(0.5, 0.7, 1.0)
-    }
     pub fn get_ray(self, i: i32, j: i32) -> Ray {
         // Get a randomly samples camera ray for the pixel at location i, j.
         let pixel_center: Vec3 =

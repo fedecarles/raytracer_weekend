@@ -19,27 +19,23 @@ impl HittableList {
 }
 
 impl Hittable for HittableList {
-    fn hit(&self, r: Ray, ray_t: Range<f32>, rec: &mut HitRecord) -> bool {
-        let mut temp_rec = HitRecord::default();
-        let mut hit_anything: bool = false;
+    fn hit(&self, r: &Ray, ray_t: Range<f32>, depth: i32) -> Option<HitRecord> {
+        let mut hit_record = None;
         let mut closest_so_far: f32 = ray_t.end;
 
         for object in &self.objects {
-            if object.hit(
-                r,
+            if let Some(rec) = object.hit(
+                &r,
                 Range {
                     start: ray_t.start,
                     end: closest_so_far,
                 },
-                &mut temp_rec,
+                depth,
             ) {
-                hit_anything = true;
-                closest_so_far = temp_rec.t;
-                rec.t = closest_so_far;
-                rec.p = temp_rec.p;
-                rec.set_face_normal(&r, temp_rec.normal);
+                closest_so_far = rec.t;
+                hit_record = Some(rec)
             }
         }
-        return hit_anything;
+        return hit_record;
     }
 }
