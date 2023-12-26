@@ -4,7 +4,7 @@ This code is my attempt to go through the [Ray Tracing in One Weekend](https://r
 
 The final output of the code is the below image.
 
-![Final](images/image_19.ppm)
+![Final](images/final.png)
 
 
 
