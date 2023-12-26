@@ -9,6 +9,7 @@ pub struct HitRecord {
     pub normal: Vec3,
     pub material: Material,
     pub t: f32,
+    pub front_face: bool,
 }
 
 pub trait Hittable {

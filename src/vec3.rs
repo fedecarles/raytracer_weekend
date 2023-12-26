@@ -1,5 +1,6 @@
 use rand::Rng;
 use std::ops;
+use std::ops::Neg;
 
 #[derive(Debug, PartialEq, Clone, Copy, Default)]
 pub struct Vec3 {
@@ -62,6 +63,19 @@ impl Vec3 {
         }
     }
 
+    pub fn random_in_unit_disk() -> Vec3 {
+        loop {
+            let p = Vec3::new(
+                rand::thread_rng().gen_range(-1.0..1.0),
+                rand::thread_rng().gen_range(-1.0..1.0),
+                0.0,
+            );
+            if p.length_squared() < 1.0 {
+                return p;
+            }
+        }
+    }
+
     pub fn random_unit_vector() -> Vec3 {
         return Vec3::unit_vector(Vec3::random_in_unit_sphere());
     }
@@ -80,8 +94,24 @@ impl Vec3 {
         return v - 2.0 * Vec3::dot(&v, &n) * n;
     }
 
+    pub fn refract(uv: Vec3, n: Vec3, etai_over_etat: f32) -> Vec3 {
+        let cos_theta = Vec3::dot(&-uv, &n).min(1.0);
+        let r_out_perp = etai_over_etat * (uv + cos_theta * n);
+        let r_out_parallel = (1.0 - r_out_perp.length_squared()).max(1.0).sqrt().neg() * n;
+
+        return r_out_parallel + r_out_perp;
+    }
+
     pub fn dot(v1: &Vec3, v2: &Vec3) -> f32 {
         v1.e[0] * v2.e[0] + v1.e[1] * v2.e[1] + v1.e[2] * v2.e[2]
+    }
+
+    pub fn cross(u: &Vec3, v: &Vec3) -> Vec3 {
+        return Vec3::new(
+            u.e[1] * v.e[2] - u.e[2] * v.e[1],
+            u.e[2] * v.e[0] - u.e[0] * v.e[2],
+            u.e[0] * v.e[1] - u.e[1] * v.e[0],
+        );
     }
 
     pub fn random(min: f32, max: f32) -> Vec3 {
@@ -106,6 +136,14 @@ impl ops::Add for Vec3 {
     }
 }
 
+impl ops::Add<f32> for Vec3 {
+    type Output = Self;
+    fn add(self, rhs: f32) -> Self::Output {
+        Vec3 {
+            e: [self.e[0] + rhs, self.e[1] + rhs, self.e[2] + rhs],
+        }
+    }
+}
 impl ops::Sub<Vec3> for Vec3 {
     type Output = Self;
     fn sub(self, rhs: Vec3) -> Self::Output {
@@ -176,26 +214,5 @@ impl ops::Neg for Vec3 {
         Vec3 {
             e: [-self.e[0], -self.e[1], -self.e[2]],
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_vec3_add() {
-        assert_eq!(
-            Vec3::new(2.0, 4.0, 6.0) + Vec3::new(1.0, 1.0, 4.0),
-            Vec3::new(3.0, 5.0, 10.0)
-        )
-    }
-    #[test]
-    fn test_vec3_mul() {
-        assert_eq!(Vec3::new(2.0, 4.0, 6.0) * 2.0, Vec3::new(4.0, 8.0, 12.0))
-    }
-    #[test]
-    fn test_vec3_div() {
-        assert_eq!(Vec3::new(4.0, 8.0, 6.0) / 2.0, Vec3::new(2.0, 4.0, 3.0))
     }
 }

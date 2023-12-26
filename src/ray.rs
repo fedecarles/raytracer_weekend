@@ -23,14 +23,3 @@ impl Ray {
         self.orig + self.dir * t
     }
 }
-
-#[cfg(test)]
-mod tests {
-
-    #[test]
-    fn test_ray_origin() {}
-    #[test]
-    fn test_ray_direction() {}
-    #[test]
-    fn test_ray_point_at_parameter() {}
-}
